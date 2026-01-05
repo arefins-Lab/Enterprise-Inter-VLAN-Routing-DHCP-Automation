@@ -2,53 +2,17 @@
 This repository contains a full-scale virtual networking lab implemented using Windows Server 2022 on Hyper-V. The project demonstrates how to transform a standard server into an enterprise-grade router with multi-department isolation and automated IP management.
 
 Project Overview
-The goal of this lab was to design a network that segments different departments using VLANs, provides centralised DHCP management, and enables secure inter-VLAN routing and Internet Access (NAT).
+This project demonstrates the design and deployment of a virtualised enterprise network infrastructure utilising Windows Server 2022 within a Hyper-V environment. The primary objective was to build a robust system capable of handling multiple department networks through VLAN segmentation, centralized DHCP management, and secure Layer 3 routing. By leveraging RRAS (Routing and Remote Access Service), the server acts as a core router, providing both Inter-VLAN communication and secure Internet access via NAT (Network Address Translation).
 
-Key Features:
-VLAN Segmentation: 
-Layer 2 isolation for 3 departments (VLAN 10, 20, 30).
-Router-on-a-Stick (Virtual): 
-Using Hyper-V Synthetic Adapters for routing.
-Multi-Scope DHCP: 
-Centralised IP distribution with interface binding fix.
-NAT Implementation: 
-Providing WAN/Internet access to private subnets.
-Automation: 
-Full lab deployment via PowerShell.
-Lab Implementation Steps (Sequence)
+🛠️ Lab Implementation Journey
+The implementation began with a strategic installation of essential server roles, focusing on Remote Access for routing capabilities and DHCP for automated client configuration. A critical phase of the project involved infrastructure preparation on the Hyper-V host, where multiple virtual network adapters were created and tagged with specific VLAN IDs (10, 20, 30) to ensure strict Layer 2 isolation between subnets. This setup simulates a "Router-on-a-Stick" topology within a virtualized environment.
 
+A significant technical challenge addressed in this lab was the DHCP listening issue on virtual interfaces. Through advanced PowerShell scripting, a manual IPv4 interface binding fix was implemented, forcing the DHCP service to communicate across all gateway addresses (172.16.x.1). Finally, NAT was configured to bridge the private departmental subnets with the WAN interface, ensuring end-to-end connectivity from the local clients to the internet.
 
-Server Role Installation
-We started by enabling the core network services on Windows Server 2022.
-Remote Access (RRAS): For Routing and NAT.
-DHCP Server: For automated IP management.
+📜 Automation & Scripting
+To ensure scalability and rapid redeployment, the entire lifecycle of the lab—from role installation to complex network bindings—was automated using PowerShell. The provided scripts eliminate manual configuration errors and serve as an "Infrastructure as Code" (IaC) template for networking professionals. These scripts cover the creation of DHCP scopes, gateway options, DNS settings, and host-side virtual switch management in a logical, step-by-step sequence.
 
-
-Networking Setup
-WAN & LAN Configuration: Configured static IPs for all department gateways.
-Virtual Switch: Implemented a single internal virtual switch to carry all VLAN traffic.
-VLAN Tagging: Created and tagged virtual adapters on the Hyper-V host to ensure traffic isolation.
-
-
-DHCP & Routing Logic
-DHCP Scopes: Created dedicated pools for each VLAN.
-Binding Fix: Applied a critical PowerShell fix to ensure the DHCP service listens on all virtual gateway interfaces.
-RRAS Initialization: Activated LAN routing to allow communication between subnets.
-
-
-Automation Scripts
-The entire lab can be audited or redeployed using the provided PowerShell scripts in the /scripts folder.
-Master-Lab-Automation.ps1: One-stop command list for roles, DHCP, and host networking.
-
-
-Troubleshooting Tips
-DHCP Not Assigning IPs: Always verify if the DHCP service is bound to the VLAN gateway IP.
-Ping Fails: Check Windows Firewall rules (ICMPv4) on the destination VM.
-No Internet: Ensure the WAN interface in RRAS is set to "Public" mode with NAT enabled.
-
-Development Logs (Commit History)
+🛠️ Development Logs (Commit History)
 Latest Commit Message: feat: implement Inter-VLAN routing and multi-scope DHCP on Hyper-V
-Automated VLAN adapter creation and tagging via PowerShell.
-Configured RRAS for L3 Routing and NAT.
-Resolved DHCP listener issues using manual IPv4 interface binding.
-Verified Inter-VLAN connectivity and WAN access.
+
+This milestone includes the full automation of VLAN adapter creation and tagging on the host side. It marks the successful configuration of RRAS for L3 Routing and NAT, alongside a critical fix for DHCP listener issues using manual IPv4 interface binding. The project has been fully verified for Inter-VLAN connectivity and stable WAN access across all subnets.
