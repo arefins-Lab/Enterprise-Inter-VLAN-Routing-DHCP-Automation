@@ -1,0 +1,60 @@
+Lab Notes: Project Insights & Key Learnings
+
+Project about:
+The main goal of this lab was to transform a Windows Server 2022 VM into a fully functional Enterprise Router. It manages three different departments (VLANs), provides them with automatic IP addresses (DHCP), and allows them to talk to each other and access the Internet (NAT).
+
+1. The Virtual Networking Logic
+In a physical world, you would need 3 separate switches for 3 VLANs. In this lab, we did "Router-on-a-Stick" virtually:
+
+The Switch: We used one single Hyper-V Internal Switch.
+The Trick: Instead of adding one network card to the server, we added 3 Virtual Adapters.
+VLAN Tagging: We used PowerShell to tell the Hyper-V host: "Hey, Adapter 1 is for VLAN 10, Adapter 2 is for VLAN 20..." This keeps the traffic isolated.
+
+2. How Routing Works (The RRAS Brain)
+By default, VLAN 10 cannot talk to VLAN 20. The RRAS (Routing and Remote Access) role acts as the bridge.
+
+Each VLAN has a Gateway IP (like 172.16.10.1).
+When a PC in VLAN 10 wants to send a file to VLAN 20, it sends the data to its Gateway.
+The Server then looks at its Routing Table and forwards the data to the VLAN 20 interface.
+
+3. NAT (How Clients get Internet)
+Since our VLANs use Private IPs (172.16.x.x), they cannot browse the internet directly.
+We configured NAT (Network Address Translation) on the Server's WAN interface (192.168.0.60).
+The Server hides the private IPs and uses its WAN IP to fetch data from the internet for the clients.
+
+4. The DHCP "Secret" (Interface Binding)
+This is the most important note of the lab!
+
+The Issue: A DHCP server usually listens on only one interface. In a multi-VLAN setup, it gets confused and won't give out IPs.
+
+The Solution: We used the Binding Fix. We explicitly told the DHCP service to "listen" on all three VLAN gateway IPs.
+
+Result: When a request comes from VLAN 30, the server sees it's coming into the 172.16.30.1 interface and knows exactly which IP pool to use.
+
+Common Troubleshooting Tips (Quick Fixes)
+"Can't ping between VLANs!"
+
+Check: Is the Windows Firewall on the Target machine ON?
+
+Fix: Either turn off the Firewall for testing or enable the ICMPv4-In rule.
+
+"My client is getting a 169.254.x.x IP!"
+
+Check: Did you restart the DHCP service after binding?
+
+Fix: Run Restart-Service DHCPServer in PowerShell.
+
+"H no Internet on the Client!"
+
+Check: Is the WAN interface in RRAS set to Public?
+
+Fix: Go to IPv4 > NAT, right-click your WAN card, and ensure NAT is enabled.
+
+Key Technical Terms Used
+VLAN Tagging: Labeling network traffic with an ID.
+
+Inter-VLAN Routing: Moving data between different VLANs.
+
+DHCP Scope: A range of IP addresses for a specific network.
+
+NAT: Sharing one internet connection with many private devices.
