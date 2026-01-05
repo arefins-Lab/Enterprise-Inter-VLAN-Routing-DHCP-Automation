@@ -10,26 +10,31 @@ Router-on-a-Stick (Virtual): Using Hyper-V Synthetic Adapters for routing.
 Multi-Scope DHCP: Centralized IP distribution with interface binding fix.
 NAT Implementation: Providing WAN/Internet access to private subnets.
 Automation: Full lab deployment via PowerShell.
-
 Lab Implementation Steps (Sequence)
-1. Server Role Installation
+
+
+Server Role Installation
 We started by enabling the core network services on Windows Server 2022.
 Remote Access (RRAS): For Routing and NAT.
 DHCP Server: For automated IP management.
+
 
 Networking Setup
 WAN & LAN Configuration: Configured static IPs for all department gateways.
 Virtual Switch: Implemented a single internal virtual switch to carry all VLAN traffic.
 VLAN Tagging: Created and tagged virtual adapters on the Hyper-V host to ensure traffic isolation.
 
+
 DHCP & Routing Logic
 DHCP Scopes: Created dedicated pools for each VLAN.
 Binding Fix: Applied a critical PowerShell fix to ensure the DHCP service listens on all virtual gateway interfaces.
 RRAS Initialization: Activated LAN routing to allow communication between subnets.
 
+
 Automation Scripts
 The entire lab can be audited or redeployed using the provided PowerShell scripts in the /scripts folder.
 Master-Lab-Automation.ps1: One-stop command list for roles, DHCP, and host networking.
+
 
 Troubleshooting Tips
 DHCP Not Assigning IPs: Always verify if the DHCP service is bound to the VLAN gateway IP.
