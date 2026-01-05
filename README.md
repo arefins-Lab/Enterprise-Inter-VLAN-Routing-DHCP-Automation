@@ -5,11 +5,16 @@ Project Overview
 The goal of this lab was to design a network that segments different departments using VLANs, provides centralised DHCP management, and enables secure inter-VLAN routing and Internet Access (NAT).
 
 Key Features:
-VLAN Segmentation: Layer 2 isolation for 3 departments (VLAN 10, 20, 30).
-Router-on-a-Stick (Virtual): Using Hyper-V Synthetic Adapters for routing.
-Multi-Scope DHCP: Centralized IP distribution with interface binding fix.
-NAT Implementation: Providing WAN/Internet access to private subnets.
-Automation: Full lab deployment via PowerShell.
+VLAN Segmentation: 
+Layer 2 isolation for 3 departments (VLAN 10, 20, 30).
+Router-on-a-Stick (Virtual): 
+Using Hyper-V Synthetic Adapters for routing.
+Multi-Scope DHCP: 
+Centralised IP distribution with interface binding fix.
+NAT Implementation: 
+Providing WAN/Internet access to private subnets.
+Automation: 
+Full lab deployment via PowerShell.
 Lab Implementation Steps (Sequence)
 
 
