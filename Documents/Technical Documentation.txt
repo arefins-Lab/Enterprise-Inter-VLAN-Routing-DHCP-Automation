@@ -1,0 +1,67 @@
+Technical Documentation: Inter-VLAN Routing & DHCP Lab
+
+1. Virtual Hardware & Role Setup
+First, install the necessary roles and prepare the virtual networking.
+
+Install Roles (Inside RRAS Server)
+PowerShell
+
+Install-WindowsFeature -Name RemoteAccess, DirectAccess-VPN, Routing, DHCP -IncludeManagementTools
+Create VLAN Adapters (On Hyper-V Host)
+PowerShell
+
+# Create 3 Adapters on the VM
+Add-VMNetworkAdapter -VMName "RRAS-EDGE01" -Name "VLAN10" -SwitchName "LAN-Switch"
+Add-VMNetworkAdapter -VMName "RRAS-EDGE01" -Name "VLAN20" -SwitchName "LAN-Switch"
+Add-VMNetworkAdapter -VMName "RRAS-EDGE01" -Name "VLAN30" -SwitchName "LAN-Switch"
+
+# Tag VLAN IDs to Adapters
+Set-VMNetworkAdapterVlan -VMName "RRAS-EDGE01" -VMNetworkAdapterName "VLAN10" -Access -VlanId 10
+Set-VMNetworkAdapterVlan -VMName "RRAS-EDGE01" -VMNetworkAdapterName "VLAN20" -Access -VlanId 20
+Set-VMNetworkAdapterVlan -VMName "RRAS-EDGE01" -VMNetworkAdapterName "VLAN30" -Access -VlanId 30
+
+2. Network & Routing Configuration (RRAS)
+Interface IP Schema
+Assign static IPs to each VLAN adapter to act as Default Gateways:
+
+VLAN10: 172.16.10.1/24
+VLAN20: 172.16.20.1/24
+VLAN30: 172.16.30.1/24
+WAN: 192.168.0.60/24 (Gateway: 192.168.0.1)
+
+Configure NAT & LAN Routing
+Open Routing and Remote Access console.
+Right-click Server Name -> Configure and Enable Routing and Remote Access.
+Choose Custom Configuration -> Select NAT and LAN Routing.
+
+In NAT Node:
+Add WAN Interface as Public (Enable NAT).
+Add VLAN 10, 20, 30 as Private.
+
+3. DHCP Multi-Scope Configuration
+Create Scopes & Options
+PowerShell
+
+# Create Scopes
+Add-DhcpServerv4Scope -Name "VLAN10" -StartRange 172.16.10.10 -EndRange 172.16.10.254 -SubnetMask 255.255.255.0
+Add-DhcpServerv4Scope -Name "VLAN20" -StartRange 172.16.20.10 -EndRange 172.16.20.254 -SubnetMask 255.255.255.0
+Add-DhcpServerv4Scope -Name "VLAN30" -StartRange 172.16.30.10 -EndRange 172.16.30.254 -SubnetMask 255.255.255.0
+
+# Configure Router (Gateway) & DNS
+Set-DhcpServerv4OptionValue -ScopeId 172.16.10.0 -Router 172.16.10.1 -DnsServer 8.8.8.8
+Set-DhcpServerv4OptionValue -ScopeId 172.16.20.0 -Router 172.16.20.1 -DnsServer 8.8.8.8
+Set-DhcpServerv4OptionValue -ScopeId 172.16.30.0 -Router 172.16.30.1 -DnsServer 8.8.8.8
+Bind DHCP to Interfaces
+PowerShell
+
+Set-DhcpServerv4Binding -IPAddress 172.16.10.1 -BindingState $true
+Set-DhcpServerv4Binding -IPAddress 172.16.20.1 -BindingState $true
+Set-DhcpServerv4Binding -IPAddress 172.16.30.1 -BindingState $true
+Restart-Service DHCPServer -Force
+
+4. Troubleshooting
+No IP on Client: Re-run DHCP Binding commands.
+
+No Inter-VLAN Ping: Enable ICMP rule on clients: netsh advfirewall firewall add rule name="Allow ICMPv4" dir=in action=allow protocol=icmpv4
+
+No Internet: Check RRAS NAT settings; ensure WAN is Public.
